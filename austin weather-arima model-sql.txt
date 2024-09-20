@@ -1,0 +1,85 @@
+SELECT *
+FROM `my-data-403501.DA04_K296.austin weather` 
+ORDER BY Date
+LIMIT 5;
+
+-- Build model TempAvgF
+CREATE OR REPLACE MODEL DA04_K296.weather_temperature_arima_model
+OPTIONS
+  (model_type = 'ARIMA_PLUS',
+   time_series_timestamp_col = 'Date',
+   time_series_data_col = 'TempAvgF'   
+  ) AS
+SELECT
+  Date, TempAvgF
+FROM
+  `my-data-403501.DA04_K296.austin weather`
+ORDER BY Date;
+
+--EVALUATE
+SELECT *
+FROM ML.ARIMA_EVALUATE (MODEL DA04_K296.weather_temperature_arima_model);
+
+--explain forecast
+SELECT
+ *
+FROM
+ ML.EXPLAIN_FORECAST(MODEL DA04_K296.weather_temperature_arima_model,
+                     STRUCT(180 AS horizon, 0.8 AS confidence_level));
+
+
+
+-- Build model PrecipitationSumInches
+SELECT 
+SUM(CASE WHEN PrecipitationSumInches = 'T' THEN 0 ELSE PrecipitationSumInches END) AS PrecipitationSumInches
+FROM `my-data-403501.DA04_K296.austin weather`;
+
+CREATE OR REPLACE MODEL DA04_K296.weather_precipitation_arima_model
+OPTIONS
+  (model_type = 'ARIMA_PLUS',
+   time_series_timestamp_col = 'Date',
+   time_series_data_col = 'PrecipitationSumInches'   
+  ) AS
+SELECT
+  Date, PrecipitationSumInches
+FROM
+  `my-data-403501.DA04_K296.austin weather`
+ORDER BY Date;
+
+--EVALUATE
+SELECT *
+FROM ML.ARIMA_EVALUATE (MODEL DA04_K296.weather_precipitation_arima_model);
+
+--explain forecast
+SELECT
+ *
+FROM
+ ML.EXPLAIN_FORECAST(MODEL DA04_K296.weather_precipitation_arima_model,
+                     STRUCT(180 AS horizon, 0.8 AS confidence_level));
+
+
+-- Build model VisibilityAvgMiles
+
+CREATE OR REPLACE MODEL DA04_K296.weather_visibility_arima_model
+OPTIONS
+  (model_type = 'ARIMA_PLUS',
+   time_series_timestamp_col = 'Date',
+   time_series_data_col = 'VisibilityAvgMiles'   
+  ) AS
+SELECT
+  Date, VisibilityAvgMiles
+FROM
+  `my-data-403501.DA04_K296.austin weather`
+ORDER BY Date;
+
+--EVALUATE
+SELECT *
+FROM ML.ARIMA_EVALUATE (MODEL DA04_K296.weather_visibility_arima_model);
+
+--explain forecast
+SELECT
+ *
+FROM
+ ML.EXPLAIN_FORECAST(MODEL DA04_K296.weather_visibility_arima_model,
+                     STRUCT(180 AS horizon, 0.8 AS confidence_level));
+
